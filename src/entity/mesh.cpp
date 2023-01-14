@@ -10,8 +10,8 @@ Texture MeshComponent::neautralTexture = Texture();
 std::vector<Texture*> MeshComponent::loadedTextures = std::vector<Texture*>();
 
 #ifdef LV_BACKEND_METAL
-uint16_t MeshComponent::bindingIndices[3] = {
-    1, 0, 2
+uint16_t MeshComponent::bindingIndices[2] = {
+    1, 0
 };
 #endif
 

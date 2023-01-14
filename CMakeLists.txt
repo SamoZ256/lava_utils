@@ -25,8 +25,8 @@ if (BACKEND_VULKAN)
     set(BACKEND vulkan)
 
     include_directories(
-        "/Users/samuliak/Documents/VMA/include/VMA"
-        "/Users/samuliak/Documents/lava_core/1.3/include/vulkan"
+        "external/vma/include"
+        "/Users/samuliak/Documents/lava_core/include/vulkan"
     )
 
     if (APPLE)
@@ -42,8 +42,8 @@ elseif (BACKEND_METAL)
     set(BACKEND metal)
 
     include_directories(
-        "/Users/samuliak/Documents/metal-cpp"
-        "/Users/samuliak/Documents/lava_core/1.3/include/metal"
+        "external/metal-cpp/include"
+        "/Users/samuliak/Documents/lava_core/include/metal"
     )
 endif ()
 
@@ -54,6 +54,7 @@ file(GLOB src
     "src/entity/*.cpp"
     "src/skylight/*.cpp"
     "src/scripting/*.cpp"
+    "src/physics/*.cpp"
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -63,19 +64,22 @@ add_library(${PROJECT_NAME} SHARED
 #set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(${PROJECT_NAME} PROPERTIES SOVERSION 1)
 
+find_package(Bullet REQUIRED)
+#message("Bullet include: '${BULLET_INCLUDE_DIRS}'")
+#message("Bullet lib: '${BULLET_LIBRARIES}'")
+
+find_package(Assimp REQUIRED)
+#message("Assimp include: '${ASSIMP_INCLUDE_DIRS}'")
+#message("Assimp lib: '${ASSIMP_LIBRARIES}'")
+
 include_directories(
     "/Users/samuliak/Documents/lvnd/include"
-    "/opt/homebrew/Cellar/glm/0.9.9.8/include"
-    "/Users/samuliak/Documents/stb/include"
-    "/opt/homebrew/Cellar/assimp/5.2.5/include"
-    "/Users/samuliak/Documents/entt/include"
+    "/usr/local/Cellar/glm/0.9.9.8/include"
+    "external/stb/include"
+    "external/entt/include"
     "include"
-)
-
-find_library (
-    ASSIMP_LIB
-    NAMES assimp libassimp # what to look for
-    HINTS "/opt/homebrew/Cellar/assimp/5.2.5/lib" # where to look
+    ${ASSIMP_INCLUDE_DIRS}
+    ${BULLET_INCLUDE_DIRS}
 )
 
 find_library(
@@ -86,8 +90,9 @@ find_library(
 )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-    ${ASSIMP_LIB}
+    ${ASSIMP_LIBRARIES}
     ${LVND_LIB}
+    ${BULLET_LIBRARIES}
 )
 
 if (BACKEND_VULKAN)
@@ -102,7 +107,7 @@ if (BACKEND_VULKAN)
     find_library (
         LAVA_CORE_LIB
         NAMES lavacore liblavacore
-        HINTS "/Users/samuliak/Documents/lava_core/1.3/lib/vulkan"
+        HINTS "/Users/samuliak/Documents/lava_core/lib/vulkan"
         NO_DEFAULT_PATH
     )
 
@@ -118,7 +123,7 @@ elseif (BACKEND_METAL)
     find_library (
         LAVA_CORE_LIB
         NAMES lavacore liblavacore
-        HINTS "/Users/samuliak/Documents/lava_core/1.3/lib/metal"
+        HINTS "/Users/samuliak/Documents/lava_core/lib/metal"
         NO_DEFAULT_PATH
     )
 

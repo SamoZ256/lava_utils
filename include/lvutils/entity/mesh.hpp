@@ -52,7 +52,7 @@ public:
     static std::vector<lv::Texture*> loadedTextures;
 
 #ifdef LV_BACKEND_METAL
-		static uint16_t bindingIndices[3];
+		static uint16_t bindingIndices[2];
 #endif
 
 #ifdef LV_BACKEND_VULKAN

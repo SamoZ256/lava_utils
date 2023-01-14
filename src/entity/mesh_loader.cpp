@@ -10,7 +10,7 @@ void MeshLoader::loadFromFile(const char* filename) {
 	Assimp::Importer import;
 	//filename = getRelativeToAssetsPath(filename);
 
-	unsigned int flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals;
+	unsigned int flags = aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_GenSmoothNormals | aiProcess_FlipUVs;
 	std::string strFilename(filename);
 	const aiScene *scene = import.ReadFile(strFilename, flags);
 
@@ -94,14 +94,22 @@ void MeshLoader::processMesh(aiMesh* mesh, const aiScene* scene) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
 		Texture* texAlbedo = loadMaterialTextures(material, aiTextureType_DIFFUSE);
-		Texture* texRoughness = loadMaterialTextures(material, aiTextureType_SHININESS);
-		Texture* texMetallic = loadMaterialTextures(material, aiTextureType_SPECULAR);
+		Texture* texMetallicRoughness = loadMaterialTextures(material, aiTextureType_DIFFUSE_ROUGHNESS);
+		if (texMetallicRoughness == nullptr)
+			texMetallicRoughness = loadMaterialTextures(material, aiTextureType_METALNESS);
+		//Texture* texMetallic = loadMaterialTextures(material, aiTextureType_SPECULAR);
 		//Texture* texNormal = loadMaterialTextures(material, aiTextureType_HEIGHT);
+
+		/*
+		for (uint8_t i = 0; i < 22; i++) {
+			std::cout << "Assimp texture" << (int)i << " found: " << material->GetTextureCount((aiTextureType)i) << std::endl;
+		}
+		*/
 
 //#ifdef LV_BACKEND_VULKAN
 		textures.push_back(texAlbedo);
-		textures.push_back(texRoughness);
-		textures.push_back(texMetallic);
+		textures.push_back(texMetallicRoughness);
+		//textures.push_back(texMetallic);
 		//textures.push_back(texNormal);
 		/*
 #elif defined LV_BACKEND_METAL
@@ -109,6 +117,12 @@ void MeshLoader::processMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.push_back(texAlbedo);
 		textures.push_back(texMetallic);
 #endif
+		*/
+
+		/*
+		for (uint8_t i = 0; i < 3; i++) {
+			std::cout << "Loaded texture " << (int)i << ": " << (textures[i] != nullptr) << std::endl;
+		}
 		*/
 
 		//glm::vec3 center = glm::vec3((minX + maxX) / 2.0f, (minY + maxY) / 2.0f, (minZ + maxZ) / 2.0f);
