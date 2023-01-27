@@ -13,7 +13,7 @@ void Script::init(const char* aFilename) {
     filename = std::string(aFilename);
     scriptName = std::filesystem::path(filename).stem();
     libFilename = g_scriptManager->scriptDir + "/compiled/" + scriptName + ".dylib";
-    cmd = "g++ -std=c++20 " + filename + " -o " + libFilename + " -Wno-deprecated-volatile -fPIC -shared -I src -I /Users/samuliak/Documents/lava_utils/include/lvutils/entity -I external/entt/include -I /usr/local/Cellar/glm/0.9.9.8/include -I /Users/samuliak/Documents/lvnd/include -L /Users/samuliak/Documents/lvnd/lib/nobackend -llvnd";
+    cmd = "g++ -std=c++20 " + filename + " -o " + libFilename + " -Wno-deprecated-volatile -fPIC -shared -I src -I /Users/samuliak/Documents/lava_utils/include/lvutils/entity -I external/entt/include -I /opt/homebrew/Cellar/glm/0.9.9.8/include -I /Users/samuliak/Documents/lvnd/include -L /Users/samuliak/Documents/lvnd/lib/nobackend -llvnd";
     
     loadFromFile();
 }

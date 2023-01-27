@@ -52,10 +52,11 @@ public:
     Sampler prefilteredMapSampler;
     
 #ifdef LV_BACKEND_VULKAN
-    VkFormat format = LV_FORMAT_RGBA8_UNORM;
+    VkFormat
 #elif defined LV_BACKEND_METAL
-    MTL::PixelFormat format = LV_FORMAT_RGBA8_UNORM;
+    MTL::PixelFormat
 #endif
+    format = LV_FORMAT_RGBA8_UNORM;
 
     std::string filename;
 

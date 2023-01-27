@@ -55,6 +55,8 @@ file(GLOB src
     "src/skylight/*.cpp"
     "src/scripting/*.cpp"
     "src/physics/*.cpp"
+    "src/math/*.cpp"
+    "src/disk_io/*.cpp"
 )
 
 add_library(${PROJECT_NAME} SHARED
@@ -72,12 +74,14 @@ find_package(Assimp REQUIRED)
 #message("Assimp include: '${ASSIMP_INCLUDE_DIRS}'")
 #message("Assimp lib: '${ASSIMP_LIBRARIES}'")
 
+find_package(glm REQUIRED)
+
 include_directories(
     "/Users/samuliak/Documents/lvnd/include"
-    "/usr/local/Cellar/glm/0.9.9.8/include"
     "external/stb/include"
     "external/entt/include"
     "include"
+    ${GLM_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
     ${BULLET_INCLUDE_DIRS}
 )

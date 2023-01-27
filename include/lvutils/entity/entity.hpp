@@ -3,11 +3,14 @@
 
 #include <entt/entt.hpp>
 
-#define TRANSFORM_COMPONENT_NAME "Transform component"
-#define MESH_COMPONENT_NAME "Mesh component"
-#define MATERIAL_COMPONENT_NAME "Material component"
-#define SCRIPT_COMPONENT_NAME "Script component"
-#define CAMERA_COMPONENT_NAME "Camera component"
+#define TRANSFORM_COMPONENT_NAME "Transform"
+#define MESH_COMPONENT_NAME "Mesh"
+#define MATERIAL_COMPONENT_NAME "Material"
+#define SCRIPT_COMPONENT_NAME "Script"
+#define CAMERA_COMPONENT_NAME "Camera"
+#define SPHERE_COLLIDER_COMPONENT_NAME "Sphere collider"
+#define BOX_COLLIDER_COMPONENT_NAME "Box collider"
+#define RIGID_BODY_COMPONENT_NAME "Rigid body"
 
 namespace lv {
 

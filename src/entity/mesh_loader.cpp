@@ -134,11 +134,11 @@ void MeshLoader::processMesh(aiMesh* mesh, const aiScene* scene) {
 		newMesh.init(vertices, indices);
 		for (uint8_t i = 0; i < textures.size(); i++) {
 			//if (textures[i] != nullptr)
-			newMesh.addTexture(textures[i], i);
+			newMesh.setTexture(textures[i], i);
 		}
 
 #ifdef LV_BACKEND_VULKAN
-		newMesh.descriptorSet->init();
+		newMesh.initDescriptorSet();
 #endif
 		/*
 		std::cout << "Init: " << aiTextureType_DIFFUSE << " : " << aiTextureType_SPECULAR << " : " << aiTextureType_HEIGHT << " : " << aiTextureType_SHININESS << " : " << aiTextureType_AMBIENT << std::endl;

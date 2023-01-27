@@ -2,16 +2,26 @@
 
 namespace lv {
 
-void RigidBodyComponent::init(ColliderComponent& collider, glm::vec3& position, glm::vec3& rotation) {
-    glm::quat rot = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+void RigidBodyComponent::init(ColliderComponent& collider, glm::vec3 position, glm::vec3 rotation) {
+    btQuaternion quat;
+    quat.setEulerZYX(glm::radians(rotation.z), glm::radians(rotation.y), glm::radians(rotation.x));
 
-    //TODO: adjust this to use the real position and rotation
-    motionState = new btDefaultMotionState(btTransform(btQuaternion(rot.x, rot.y, rot.z, rot.w), btVector3(0, 10, 0)));
+    motionState = new btDefaultMotionState(btTransform(quat, btVector3(position.x, position.y, position.z)));
+    //btTransform transform;
+    //motionState->getWorldTransform(transform);
+    //transform->setFromOpenGLMatrix()
 
-    btVector3 intertia(0, 0, 0);
     collider.shape->calculateLocalInertia(mass, intertia);
-    btRigidBody::btRigidBodyConstructionInfo sphereRigidBodyCI(mass, motionState, collider.shape, intertia);
-    rigidBody = new btRigidBody(sphereRigidBodyCI);
+    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(mass, motionState, collider.shape, intertia);
+    rigidBodyCI.m_restitution = restitution;
+    rigidBodyCI.m_friction = friction;
+    rigidBody = new btRigidBody(rigidBodyCI);
+
+    /*
+    btTransform transform;
+    motionState->getWorldTransform(transform);
+    transform.getBasis().setEulerZYX(glm::radians(rotation.z), glm::radians(rotation.y), glm::radians(rotation.x));
+    */
 
     world->world->addRigidBody(rigidBody);
 }
@@ -20,6 +30,34 @@ void RigidBodyComponent::destroy() {
     world->world->removeRigidBody(rigidBody);
     delete motionState;
     delete rigidBody;
+    rigidBody = nullptr;
+}
+
+void RigidBodyComponent::setMass() {
+    //float crntMass;
+    //rigidBody->getMassProps(&crntMass, &intertia);
+    //if (crntMass != mass) {
+        rigidBody->setMassProps(mass, intertia);
+    //}
+}
+
+void RigidBodyComponent::setOrigin() {
+    btTransform transform;
+    motionState->getWorldTransform(transform);
+    transform.setOrigin(btVector3(origin.x, origin.y, origin.z));
+}
+
+void RigidBodyComponent::setRotation(glm::vec3 rotation) {
+    btTransform transform;
+    motionState->getWorldTransform(transform);
+    transform.getBasis().setEulerZYX(glm::radians(rotation.z), glm::radians(rotation.y), glm::radians(rotation.x));
+}
+
+void RigidBodyComponent::getRotation(glm::vec3& rotation) {
+    btTransform transform;
+    motionState->getWorldTransform(transform);
+    transform.getBasis().getEulerZYX(rotation.z, rotation.y, rotation.x);
+    rotation = glm::degrees(rotation);
 }
 
 } //namespace lv

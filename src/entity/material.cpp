@@ -7,7 +7,7 @@ namespace lv {
 #ifdef LV_BACKEND_VULKAN
 MaterialComponent::MaterialComponent(PipelineLayout& pipelineLayout) {
     descriptorSet = new DescriptorSet(pipelineLayout, 1);
-    descriptorSet->addBufferBinding(materialUniformBuffer.descriptorInfo(), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    descriptorSet->addBinding(materialUniformBuffer.descriptorInfo(), 0);
     descriptorSet->init();
 }
 #endif

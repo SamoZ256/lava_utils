@@ -1,7 +1,7 @@
 #ifndef LV_MESH_H
 #define LV_MESH_H
 
-#include <vector>
+#include <array>
 //#include <iterator>
 //#include <map>
 #include <string>
@@ -17,6 +17,8 @@
 #endif
 #include "vertex.hpp"
 
+#define LV_MESH_TEXTURE_COUNT 2
+
 namespace lv {
 
 /*
@@ -30,26 +32,31 @@ class MeshComponent {
 public:
     //std::vector<Texture*>& textures;
     //std::map<std::string, bool> setTextures;
-#ifdef LV_BACKEND_METAL
-    std::vector<std::pair<Texture*, uint16_t> > textures;
-#endif
 
-    std::vector<std::pair<Texture*, uint16_t> > texturesToSave;
     std::vector<MainVertex> vertices;
-    std::vector<unsigned int> indices;
+    std::vector<uint32_t> indices;
+
+    std::string vertDataFilename;
+    std::string indDataFilename;
 
     //Rendering
     Buffer vertexBuffer;
     Buffer indexBuffer;
-#ifdef LV_BACKEND_VULKAN
-    DescriptorSet* descriptorSet;// = DescriptorSet(0, 2);
-#endif
     //UniformBuffer uniformBuffer = UniformBuffer(sizeof(UBOAvailableTextures));
     //UBOAvailableTextures uboAvailableTextures;
 
     static Texture neautralTexture;
 
     static std::vector<lv::Texture*> loadedTextures;
+
+    std::array<Texture*, LV_MESH_TEXTURE_COUNT> textures = {
+        &neautralTexture, &neautralTexture
+    };
+
+    //Dimensions
+    float minX, minY, minZ;
+    float maxX, maxY, maxZ;
+    float radius;
 
 #ifdef LV_BACKEND_METAL
 		static uint16_t bindingIndices[2];
@@ -59,11 +66,17 @@ public:
     MeshComponent(PipelineLayout& pipelineLayout) { descriptorSet = new DescriptorSet(pipelineLayout, 2); }
 #endif
 
-    void init(std::vector<MainVertex>& aVertices, std::vector<unsigned int>& aIndices/*, std::vector<Texture*>& aTextures*/);
+    void init(std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices/*, std::vector<Texture*>& aTextures*/);
 
     void destroy();
 
-    void addTexture(lv::Texture* texture, uint16_t index);
+#ifdef LV_BACKEND_VULKAN
+    void initDescriptorSet();
+
+    void destroyDescriptorSet();
+#endif
+
+    void setTexture(lv::Texture* texture, uint8_t index);
 
     void render();
 
@@ -77,8 +90,15 @@ public:
 
 	void createPlane();
 
+    void loadFromFile(const char* aVertDataFilename, const char* aIndDataFilename);
+
     //Static functions
     static Texture* loadTextureFromFile(const char* filename);
+
+private:
+#ifdef LV_BACKEND_VULKAN
+    DescriptorSet* descriptorSet;
+#endif
 };
 
 } //namespace lv

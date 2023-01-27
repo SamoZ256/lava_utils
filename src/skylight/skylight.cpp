@@ -120,7 +120,7 @@ void Skylight::load(const char* aFilename, GraphicsPipelineCreateInfo& equiToCub
     environmentMapSampler.init();
 
 #ifdef LV_BACKEND_VULKAN
-    environmentMapImage.transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    environmentMapImage.transitionLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 #endif
     //ImageBuffer::createImageSampler(sampler, VK_FILTER_LINEAR);
 
@@ -146,11 +146,11 @@ void Skylight::load(const char* aFilename, GraphicsPipelineCreateInfo& equiToCub
     for (uint8_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) tempImageView.imageViews[i] = imageView;
     */
 
-    framebuffer.addColorAttachment({&environmentMapImage,
+    framebuffer.addColorAttachment(&environmentMapImage,
 #ifdef LV_BACKEND_VULKAN
     &environmentMapImageView,
 #endif
-    0});
+    0);
     //mainRenderPass.framebuffer.setDepthAttachment(&mainRenderPass.depthAttachment, 1);
 
     //std::cout << "Test 1 passed" << std::endl;
@@ -182,10 +182,11 @@ void Skylight::load(const char* aFilename, GraphicsPipelineCreateInfo& equiToCub
         stagingSamplerInfo.infos[0].imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
         stagingSamplerInfo.infos[0].imageView = stagingImageView;
         stagingSamplerInfo.infos[0].sampler = stagingSampler;
+        stagingSamplerInfo.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
         //}
         descriptorSets[i].frameCount = 1;
-        descriptorSets[i].addBufferBinding(uniformBuffers[i].descriptorInfo(), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-        descriptorSets[i].addImageBinding(stagingSamplerInfo, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        descriptorSets[i].addBinding(uniformBuffers[i].descriptorInfo(), 0);
+        descriptorSets[i].addBinding(stagingSamplerInfo, 1);
         descriptorSets[i].init();
     }
 #endif
@@ -307,11 +308,11 @@ void Skylight::createIrradianceMap(GraphicsPipelineCreateInfo& irradianceGraphic
     for (uint8_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) tempImageView.imageViews[i] = imageView;
     */
 
-    framebuffer.addColorAttachment({&irradianceMapImage,
+    framebuffer.addColorAttachment(&irradianceMapImage,
 #ifdef LV_BACKEND_VULKAN
     &irradianceMapImageView,
 #endif
-    0});
+    0);
     //mainRenderPass.framebuffer.setDepthAttachment(&mainRenderPass.depthAttachment, 1);
 
     //std::cout << "Test 1 passed" << std::endl;
@@ -332,15 +333,15 @@ void Skylight::createIrradianceMap(GraphicsPipelineCreateInfo& irradianceGraphic
     );
 
 #ifdef LV_BACKEND_VULKAN
-    irradianceMapImage.transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    irradianceMapImage.transitionLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     
     UniformBuffer uniformBuffers[6] = { UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)) };
     
     DescriptorSet descriptorSets[6] = { DescriptorSet(irradianceGraphicsPipeline->pipelineLayout, 0), DescriptorSet(irradianceGraphicsPipeline->pipelineLayout, 0), DescriptorSet(irradianceGraphicsPipeline->pipelineLayout, 0), DescriptorSet(irradianceGraphicsPipeline->pipelineLayout, 0), DescriptorSet(irradianceGraphicsPipeline->pipelineLayout, 0), DescriptorSet(irradianceGraphicsPipeline->pipelineLayout, 0) };
     for (uint8_t i = 0; i < 6; i++) {
         descriptorSets[i].frameCount = 1;
-        descriptorSets[i].addBufferBinding(uniformBuffers[i].descriptorInfo(), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-        descriptorSets[i].addImageBinding(environmentMapSampler.descriptorInfo(environmentMapImageView), 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        descriptorSets[i].addBinding(uniformBuffers[i].descriptorInfo(), 0);
+        descriptorSets[i].addBinding(environmentMapSampler.descriptorInfo(environmentMapImageView), 1);
         descriptorSets[i].init();
     }
 #endif
@@ -442,7 +443,8 @@ void Skylight::createPrefilteredMap(GraphicsPipelineCreateInfo& prefilteredGraph
 
     //Sampler
     prefilteredMapSampler.filter = LV_FILTER_LINEAR;
-    prefilteredMapSampler.init(MAX_CUBEMAP_MIP_LEVELS - 1);
+    prefilteredMapSampler.maxLod = MAX_CUBEMAP_MIP_LEVELS - 1;
+    prefilteredMapSampler.init();
     //ImageBuffer::createImageSampler(sampler, VK_FILTER_LINEAR);
 
     //mainRenderPass.depthAttachment.usage |= VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
@@ -469,9 +471,9 @@ void Skylight::createPrefilteredMap(GraphicsPipelineCreateInfo& prefilteredGraph
     for (uint8_t i = 0; i < MAX_CUBEMAP_MIP_LEVELS; i++) {
         framebuffers[i].frameCount = 1;
 #ifdef LV_BACKEND_VULKAN
-        framebuffers[i].addColorAttachment({&prefilteredMapImage, &prefilteredMapImageViewsForWriting[i], 0});
+        framebuffers[i].addColorAttachment(&prefilteredMapImage, &prefilteredMapImageViewsForWriting[i], 0);
 #elif defined LV_BACKEND_METAL
-        framebuffers[i].addColorAttachment({&prefilteredMapImagesForWriting[i], 0});
+        framebuffers[i].addColorAttachment(&prefilteredMapImagesForWriting[i], 0);
 #endif
     }
     //mainRenderPass.framebuffer.setDepthAttachment(&mainRenderPass.depthAttachment, 1);
@@ -497,15 +499,15 @@ void Skylight::createPrefilteredMap(GraphicsPipelineCreateInfo& prefilteredGraph
     }
 
 #ifdef LV_BACKEND_VULKAN
-    prefilteredMapImage.transitionLayout(VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+    prefilteredMapImage.transitionLayout(VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
     
     UniformBuffer uniformBuffers[6] = { UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)), UniformBuffer(sizeof(UBOCubemapVP)) };
     
     DescriptorSet descriptorSets[6] = { DescriptorSet(prefilteredGraphicsPipeline->pipelineLayout, 0), DescriptorSet(prefilteredGraphicsPipeline->pipelineLayout, 0), DescriptorSet(prefilteredGraphicsPipeline->pipelineLayout, 0), DescriptorSet(prefilteredGraphicsPipeline->pipelineLayout, 0), DescriptorSet(prefilteredGraphicsPipeline->pipelineLayout, 0), DescriptorSet(prefilteredGraphicsPipeline->pipelineLayout, 0) };
     for (uint8_t i = 0; i < 6; i++) {
         descriptorSets[i].frameCount = 1;
-        descriptorSets[i].addBufferBinding(uniformBuffers[i].descriptorInfo(), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
-        descriptorSets[i].addImageBinding(environmentMapSampler.descriptorInfo(environmentMapImageView), 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
+        descriptorSets[i].addBinding(uniformBuffers[i].descriptorInfo(), 0);
+        descriptorSets[i].addBinding(environmentMapSampler.descriptorInfo(environmentMapImageView), 1);
         descriptorSets[i].init();
     }
 #endif

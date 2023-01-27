@@ -13,16 +13,25 @@ public:
 
     virtual void init() { throw std::runtime_error("Cannot call the 'init' method of base class 'Collider'"); }
 
-    virtual void destroy() { throw std::runtime_error("Cannot call the 'destroy' method of base class 'Collider'"); }
+    virtual void destroy() { delete shape; }
 };
 
-class ShpereColliderComponent : public ColliderComponent {
+class SphereColliderComponent : public ColliderComponent {
 public:
     float radius = 1.0f;
 
     void init();
 
-    void destroy() { delete shape; }
+    void setRadius();
+};
+
+class BoxColliderComponent : public ColliderComponent {
+public:
+    glm::vec3 scale = glm::vec3(1.0f);
+
+    void init();
+
+    void setScale();
 };
 
 } //namespace lv

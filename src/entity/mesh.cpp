@@ -2,7 +2,7 @@
 
 #include "lvcore/core/enums.hpp"
 
-#include <iostream>
+#include "lvutils/disk_io/disk_io.hpp"
 
 namespace lv {
 
@@ -15,7 +15,7 @@ uint16_t MeshComponent::bindingIndices[2] = {
 };
 #endif
 
-void MeshComponent::init(std::vector<MainVertex>& aVertices, std::vector<unsigned int>& aIndices) {
+void MeshComponent::init(std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices) {
     vertices = aVertices;
     indices = aIndices;
 
@@ -33,6 +33,23 @@ void MeshComponent::init(std::vector<MainVertex>& aVertices, std::vector<unsigne
     }
     */
     //descriptorSet.addBufferBinding(uniformBuffer.descriptorInfo(), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+
+    //Get dimensions
+    float radius2 = 0.0f;
+    for (auto& vertex : vertices) {
+        minX = std::min(minX, vertex.position.x);
+        minY = std::min(minY, vertex.position.y);
+        minZ = std::min(minZ, vertex.position.z);
+
+        maxX = std::max(maxX, vertex.position.x);
+        maxY = std::max(maxY, vertex.position.y);
+        maxZ = std::max(maxZ, vertex.position.z);
+
+        radius2 = std::max(radius2, vertex.position.x * vertex.position.x + 
+                                    vertex.position.y * vertex.position.y + 
+                                    vertex.position.z * vertex.position.z);
+    }
+    radius = sqrt(radius2);
 }
 
 void MeshComponent::destroy() {
@@ -42,30 +59,31 @@ void MeshComponent::destroy() {
   //for (auto& tex : textures) tex.destroy();
 }
 
-void MeshComponent::addTexture(lv::Texture* texture, uint16_t index) {
 #ifdef LV_BACKEND_VULKAN
-  if (texture == nullptr)
-    descriptorSet->addImageBinding(neautralTexture.sampler.descriptorInfo(neautralTexture.imageView), index, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-  else
-    descriptorSet->addImageBinding(texture->sampler.descriptorInfo(texture->imageView), index, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-#elif defined LV_BACKEND_METAL
-  if (texture == nullptr)
-    textures.push_back({&neautralTexture, bindingIndices[index]});
-  else
-    textures.push_back({texture, bindingIndices[index]});
+void MeshComponent::initDescriptorSet() {
+    for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
+        descriptorSet->addBinding(textures[i]->sampler.descriptorInfo(textures[i]->imageView), i);
+    }
+
+    descriptorSet->init();
+}
+
+void MeshComponent::destroyDescriptorSet() {
+    descriptorSet->destroy();
+}
 #endif
-  if (texture != nullptr)
-    texturesToSave.push_back({texture, index});
-  //uboAvailableTextures.availableTextures[index] = true;
+
+void MeshComponent::setTexture(Texture* texture, uint8_t index) {
+    textures[index] = texture;
 }
 
 void MeshComponent::render() {
 #ifdef LV_BACKEND_VULKAN
 		descriptorSet->bind();
 #elif defined LV_BACKEND_METAL
-		for (auto& texturePair : textures) {
-			texturePair.first->image.bind(texturePair.second);
-			texturePair.first->sampler.bind(texturePair.second);
+		for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
+			textures[i]->image.bind(bindingIndices[i]);
+			textures[i]->sampler.bind(bindingIndices[i]);
 		}
 #endif
     renderNoTextures(
@@ -113,6 +131,25 @@ void MeshComponent::createPlane() {
     init(vertices, indices);
 }
 
+void MeshComponent::loadFromFile(const char* aVertDataFilename, const char* aIndDataFilename) {
+    vertDataFilename = std::string(aVertDataFilename);
+    indDataFilename = std::string(aIndDataFilename);
+
+    void* vertData;
+    size_t vertSize;
+    lv::loadRawBinary(aVertDataFilename, &vertData, &vertSize);
+
+    std::vector<lv::MainVertex> vertices((lv::MainVertex*)vertData, (lv::MainVertex*)vertData + vertSize / sizeof(lv::MainVertex));//((std::istreambuf_iterator<char>(vertFile)), std::istreambuf_iterator<char>());
+
+    void* indData;
+    size_t indSize;
+    lv::loadRawBinary(aIndDataFilename, &indData, &indSize);
+
+    std::vector<uint32_t> indices((uint32_t*)indData, (uint32_t*)indData + indSize / sizeof(uint32_t));//((unsigned int*)indChar, (unsigned int*)indChar + strlen(indChar) * sizeof(char));
+
+    init(vertices, indices);
+}
+
 Texture* MeshComponent::loadTextureFromFile(const char* filename) {
     std::string strFilename(filename);
 
@@ -126,6 +163,7 @@ Texture* MeshComponent::loadTextureFromFile(const char* filename) {
 
 	Texture* texture = new Texture;
 	texture->load(filename);
+    texture->generateMipmaps = true;
 	texture->init();
 	loadedTextures.push_back(texture);
 

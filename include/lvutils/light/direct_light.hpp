@@ -8,7 +8,7 @@
 namespace lv {
 
 struct UniformDirectLight {
-    glm::vec4 color = glm::vec4(2.5f);
+    glm::vec4 color = glm::vec4(4.0f);
     glm::vec3 direction = glm::vec3(0.0f, -1.0f, 0.0f);
 };
 
