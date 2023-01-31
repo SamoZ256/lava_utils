@@ -1,8 +1,6 @@
 #ifndef LV_MATERIAL_H
 #define LV_MATERIAL_H
 
-#include "backend.hpp"
-
 #include "../libraries/glm.hpp"
 
 #include "lvcore/core/uniform_buffer.hpp"

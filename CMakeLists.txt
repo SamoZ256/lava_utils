@@ -24,9 +24,12 @@ if (BACKEND_VULKAN)
 
     set(BACKEND vulkan)
 
+    add_compile_definitions(
+        LV_BACKEND_VULKAN
+    )
+
     include_directories(
         "external/vma/include"
-        "/Users/samuliak/Documents/lava_core/include/vulkan"
     )
 
     if (APPLE)
@@ -41,9 +44,12 @@ elseif (BACKEND_METAL)
 
     set(BACKEND metal)
 
+    add_compile_definitions(
+        LV_BACKEND_METAL
+    )
+
     include_directories(
         "external/metal-cpp/include"
-        "/Users/samuliak/Documents/lava_core/include/metal"
     )
 endif ()
 
@@ -77,7 +83,8 @@ find_package(Assimp REQUIRED)
 find_package(glm REQUIRED)
 
 include_directories(
-    "/Users/samuliak/Documents/lvnd/include"
+    "/Users/samuliak/Documents/lava_window/include"
+    "/Users/samuliak/Documents/lava_core/include"
     "external/stb/include"
     "external/entt/include"
     "include"
@@ -89,7 +96,14 @@ include_directories(
 find_library(
     LVND_LIB
     NAMES lvnd liblvnd
-    HINTS "/Users/samuliak/Documents/lvnd/lib/${BACKEND}"
+    HINTS "/Users/samuliak/Documents/lava_window/lib"
+    NO_DEFAULT_PATH
+)
+
+find_library (
+    LAVA_CORE_LIB
+    NAMES lavacore liblavacore
+    HINTS "/Users/samuliak/Documents/lava_core/lib"
     NO_DEFAULT_PATH
 )
 
@@ -97,6 +111,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     ${ASSIMP_LIBRARIES}
     ${LVND_LIB}
     ${BULLET_LIBRARIES}
+    ${LAVA_CORE_LIB}
 )
 
 if (BACKEND_VULKAN)
@@ -108,34 +123,18 @@ if (BACKEND_VULKAN)
         )
     endif ()
 
-    find_library (
-        LAVA_CORE_LIB
-        NAMES lavacore liblavacore
-        HINTS "/Users/samuliak/Documents/lava_core/lib/vulkan"
-        NO_DEFAULT_PATH
-    )
-
     target_link_libraries(${PROJECT_NAME} PUBLIC
         ${Vulkan_LIBRARIES}
-        ${LAVA_CORE_LIB}
     )
 elseif (BACKEND_METAL)
     find_library(NS_FOUNDATION_LIB Foundation)
     find_library(QUARTZCORE_LIB QuartzCore)
     find_library(METAL_LIB Metal)
 
-    find_library (
-        LAVA_CORE_LIB
-        NAMES lavacore liblavacore
-        HINTS "/Users/samuliak/Documents/lava_core/lib/metal"
-        NO_DEFAULT_PATH
-    )
-
     target_link_libraries(${PROJECT_NAME} PUBLIC
         ${NS_FOUNDATION_LIB}
         ${QUARTZCORE_LIB}
         ${METAL_LIB}
-        ${LAVA_CORE_LIB}
     )
 endif ()
 

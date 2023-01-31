@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include "backend.hpp"
-
 #include "lvcore/core/vertex_descriptor.hpp"
 
 #include "../libraries/glm.hpp"

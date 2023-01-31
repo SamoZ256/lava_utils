@@ -6,8 +6,6 @@
 //#include <map>
 #include <string>
 
-#include "backend.hpp"
-
 #include "../libraries/glm.hpp"
 
 #include "lvcore/core/buffer.hpp"

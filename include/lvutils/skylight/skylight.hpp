@@ -6,17 +6,14 @@
 #include <string>
 #include <vector>
 
-#include "backend.hpp"
-
-#include "lvcore/core/common.hpp"
 #include "lvcore/core/enums.hpp"
 
-#ifdef LV_BACKEND_VULKAN
+#include "lvcore/core/image.hpp"
 #include "lvcore/core/image_view.hpp"
-#endif
 #include "lvcore/core/buffer.hpp"
 #include "lvcore/core/graphics_pipeline.hpp"
 #include "lvcore/core/sampler.hpp"
+#include "lvcore/core/render_pass.hpp"
 
 #include "../entity/vertex.hpp"
 
@@ -33,30 +30,19 @@ struct UBOCubemapVP {
 class Skylight {
 public:
     Image environmentMapImage;
-#ifdef LV_BACKEND_VULKAN
     ImageView environmentMapImageView;
-#endif
     Sampler environmentMapSampler;
     //VmaAllocation allocation;
 
     Image irradianceMapImage;
-#ifdef LV_BACKEND_VULKAN
     ImageView irradianceMapImageView;
-#endif
     Sampler irradianceMapSampler;
 
     Image prefilteredMapImage;
-#ifdef LV_BACKEND_VULKAN
     ImageView prefilteredMapImageView;
-#endif
     Sampler prefilteredMapSampler;
     
-#ifdef LV_BACKEND_VULKAN
-    VkFormat
-#elif defined LV_BACKEND_METAL
-    MTL::PixelFormat
-#endif
-    format = LV_FORMAT_RGBA8_UNORM;
+    LvFormat format = LV_FORMAT_RGBA8_UNORM;
 
     std::string filename;
 
