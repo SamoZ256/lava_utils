@@ -31,14 +31,6 @@ if (BACKEND_VULKAN)
     include_directories(
         "external/vma/include"
     )
-
-    if (APPLE)
-        include_directories(
-            "/Users/samuliak/VulkanSDK/1.3.236.0/macOS/include"
-        )
-    elseif (WIN32)
-        find_package(Vulkan REQUIRED)
-    endif ()
 elseif (BACKEND_METAL)
     message("Building using metal backend")
 
@@ -76,15 +68,22 @@ find_package(Bullet REQUIRED)
 #message("Bullet include: '${BULLET_INCLUDE_DIRS}'")
 #message("Bullet lib: '${BULLET_LIBRARIES}'")
 
-find_package(Assimp REQUIRED)
+find_package(Assimp)
+if (NOT Assimp_FOUND)
+    find_library(
+        Assimp_LIBRAIES
+        NAMES assimp libassimp
+        HINTS "/usr/lib/x86_64-linux-gnu"
+    )
+endif ()
 #message("Assimp include: '${ASSIMP_INCLUDE_DIRS}'")
 #message("Assimp lib: '${ASSIMP_LIBRARIES}'")
 
 find_package(glm REQUIRED)
 
 include_directories(
-    "/Users/samuliak/Documents/lava_window/include"
-    "/Users/samuliak/Documents/lava_core/include"
+    "/home/samuliak/Documents/lava_window/include"
+    "/home/samuliak/Documents/lava_core/include"
     "external/stb/include"
     "external/entt/include"
     "include"
@@ -96,14 +95,14 @@ include_directories(
 find_library(
     LVND_LIB
     NAMES lvnd liblvnd
-    HINTS "/Users/samuliak/Documents/lava_window/lib"
+    HINTS "/home/samuliak/Documents/lava_window/lib"
     NO_DEFAULT_PATH
 )
 
 find_library (
     LAVA_CORE_LIB
     NAMES lavacore liblavacore
-    HINTS "/Users/samuliak/Documents/lava_core/lib"
+    HINTS "/home/samuliak/Documents/lava_core/lib"
     NO_DEFAULT_PATH
 )
 
@@ -115,6 +114,14 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
 )
 
 if (BACKEND_VULKAN)
+    if (APPLE)
+        include_directories(
+            "/Users/samuliak/VulkanSDK/1.3.236.0/macOS/include"
+        )
+    else ()
+        find_package(Vulkan REQUIRED)
+    endif ()
+    
     if (APPLE)
         find_library (
             Vulkan_LIBRARIES

@@ -20,6 +20,9 @@ public:
   glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f);
   glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 
+  //TransformComponent(const TransformComponent &) {}
+  //void operator=(const TransformComponent &) {}
+
   void calcModel(glm::mat4 parentModel);
 
   //void uploadModel(VkPipelineLayout& pipelineLayout);

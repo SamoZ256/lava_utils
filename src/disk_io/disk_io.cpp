@@ -1,5 +1,7 @@
 #include "lvutils/disk_io/disk_io.hpp"
 
+#include <filesystem>
+
 namespace lv {
 
 void dumpRawBinary(const char* filename, void* data, size_t size) {

@@ -1,6 +1,8 @@
 #ifndef LV_COLLISION_SHAPE_H
 #define LV_COLLISION_SHAPE_H
 
+#include <stdexcept>
+
 #include "lvutils/libraries/glm.hpp"
 
 #include "physics_world.hpp"

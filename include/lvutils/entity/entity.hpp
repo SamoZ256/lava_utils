@@ -1,7 +1,7 @@
 #ifndef LV_ENTITY_H
 #define LV_ENTITY_H
 
-#include <entt/entt.hpp>
+#include <entt/entity/registry.hpp>
 
 #define TRANSFORM_COMPONENT_NAME "Transform"
 #define MESH_COMPONENT_NAME "Mesh"
