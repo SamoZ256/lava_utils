@@ -82,10 +82,10 @@ endif ()
 find_package(glm REQUIRED)
 
 include_directories(
-    "/home/samuliak/Documents/lava_window/include"
-    "/home/samuliak/Documents/lava_core/include"
+    "/Users/samuliak/Documents/lava_window/include"
+    "/Users/samuliak/Documents/lava_core/include"
     "external/stb/include"
-    "external/entt/include"
+    "external/entt/src"
     "include"
     ${GLM_INCLUDE_DIRS}
     ${ASSIMP_INCLUDE_DIRS}
@@ -95,14 +95,14 @@ include_directories(
 find_library(
     LVND_LIB
     NAMES lvnd liblvnd
-    HINTS "/home/samuliak/Documents/lava_window/lib"
+    HINTS "/Users/samuliak/Documents/lava_window/lib"
     NO_DEFAULT_PATH
 )
 
 find_library (
     LAVA_CORE_LIB
     NAMES lavacore liblavacore
-    HINTS "/home/samuliak/Documents/lava_core/lib"
+    HINTS "/Users/samuliak/Documents/lava_core/lib"
     NO_DEFAULT_PATH
 )
 

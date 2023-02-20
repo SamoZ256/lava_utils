@@ -6,16 +6,17 @@
 
 namespace lv {
 
-Texture MeshComponent::neautralTexture = Texture();
+Texture MeshComponent::neutralTexture = Texture();
+Texture MeshComponent::normalNeutralTexture = Texture();
 std::vector<Texture*> MeshComponent::loadedTextures = std::vector<Texture*>();
 
 #ifdef LV_BACKEND_METAL
-uint16_t MeshComponent::bindingIndices[2] = {
-    1, 0
+uint16_t MeshComponent::bindingIndices[LV_MESH_TEXTURE_COUNT] = {
+    2, 1, 0
 };
 #endif
 
-void MeshComponent::init(std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices) {
+void MeshComponent::init(uint8_t threadIndex, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices) {
     vertices = aVertices;
     indices = aIndices;
 
@@ -24,8 +25,8 @@ void MeshComponent::init(std::vector<MainVertex>& aVertices, std::vector<uint32_
     vertexBuffer.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
     indexBuffer.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 #endif
-    vertexBuffer.init(vertices.data(), vertices.size() * sizeof(MainVertex));
-    indexBuffer.init(indices.data(), indices.size() * sizeof(uint32_t));
+    vertexBuffer.init(threadIndex, vertices.data(), vertices.size() * sizeof(MainVertex));
+    indexBuffer.init(threadIndex, indices.data(), indices.size() * sizeof(uint32_t));
     /*
     for (uint8_t i = 0; i < textures.size(); i++) {
         if (textures[i] != nullptr)
@@ -74,17 +75,18 @@ void MeshComponent::destroyDescriptorSet() {
 #endif
 
 void MeshComponent::setTexture(Texture* texture, uint8_t index) {
-    textures[index] = texture;
+    if (texture != nullptr)
+        textures[index] = texture;
 }
 
 void MeshComponent::render() {
 #ifdef LV_BACKEND_VULKAN
-		descriptorSet->bind();
-#elif defined LV_BACKEND_METAL
-		for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
-			textures[i]->image.bind(bindingIndices[i]);
-			textures[i]->sampler.bind(bindingIndices[i]);
-		}
+    descriptorSet->bind();
+#elif defined(LV_BACKEND_METAL)
+    for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
+        textures[i]->image.bind(bindingIndices[i]);
+        textures[i]->sampler.bind(bindingIndices[i]);
+    }
 #endif
     renderNoTextures(
 #ifdef LV_BACKEND_METAL
@@ -106,32 +108,31 @@ void MeshComponent::renderNoTextures(
 uint8_t bindingIndex
 #endif
 ) {
-#ifdef LV_BACKEND_VULKAN
-    vertexBuffer.bindVertexBuffer();
+    vertexBuffer.bindVertexBuffer(
+#ifdef LV_BACKEND_METAL
+        bindingIndex
+#endif
+    );
     indexBuffer.bindIndexBuffer(LV_INDEX_TYPE_UINT32);
     indexBuffer.renderIndexed(sizeof(uint32_t));
-#elif defined LV_BACKEND_METAL
-    vertexBuffer.bindVertexBuffer(bindingIndex);
-    indexBuffer.renderIndexed(LV_INDEX_TYPE_UINT32, sizeof(uint32_t));
-#endif
 }
 
-void MeshComponent::createPlane() {
+void MeshComponent::createPlane(uint8_t threadIndex) {
     static std::vector<MainVertex> vertices = {
-        {{-0.5f, 0.0f, -0.5f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-        {{ 0.5f, 0.0f, -0.5f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-        {{ 0.5f, 0.0f,  0.5f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
-        {{-0.5f, 0.0f,  0.5f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f}}
+        {{-0.5f, 0.0f, -0.5f}, {0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}},
+        {{ 0.5f, 0.0f, -0.5f}, {1.0f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}},
+        {{ 0.5f, 0.0f,  0.5f}, {1.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}},
+        {{-0.5f, 0.0f,  0.5f}, {0.0f, 1.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}}
     };
     static std::vector<uint32_t> indices = {
         0, 2, 1,
         0, 3, 2
     };
 
-    init(vertices, indices);
+    init(threadIndex, vertices, indices);
 }
 
-void MeshComponent::loadFromFile(const char* aVertDataFilename, const char* aIndDataFilename) {
+void MeshComponent::loadFromFile(uint8_t threadIndex, const char* aVertDataFilename, const char* aIndDataFilename) {
     vertDataFilename = std::string(aVertDataFilename);
     indDataFilename = std::string(aIndDataFilename);
 
@@ -147,10 +148,10 @@ void MeshComponent::loadFromFile(const char* aVertDataFilename, const char* aInd
 
     std::vector<uint32_t> indices((uint32_t*)indData, (uint32_t*)indData + indSize / sizeof(uint32_t));//((unsigned int*)indChar, (unsigned int*)indChar + strlen(indChar) * sizeof(char));
 
-    init(vertices, indices);
+    init(threadIndex, vertices, indices);
 }
 
-Texture* MeshComponent::loadTextureFromFile(const char* filename) {
+Texture* MeshComponent::loadTextureFromFile(uint8_t threadIndex, const char* filename, LvFormat format) {
     std::string strFilename(filename);
 
     //Check if it has not been loaded yet
@@ -162,9 +163,10 @@ Texture* MeshComponent::loadTextureFromFile(const char* filename) {
 	//}
 
 	Texture* texture = new Texture;
+    texture->format = format;
 	texture->load(filename);
     texture->generateMipmaps = true;
-	texture->init();
+	texture->init(threadIndex);
 	loadedTextures.push_back(texture);
 
 	return texture;

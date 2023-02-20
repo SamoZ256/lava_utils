@@ -25,7 +25,10 @@ VertexDescriptor* MainVertex::getVertexDescriptor() {
 	vertexDesc->addBinding(2, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, normal));
 
 	//Tangent
-	vertexDesc->addBinding(3, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, tangent));
+	vertexDesc->addBinding(3, LV_VERTEX_FORMAT_RGBA32_SFLOAT, offsetof(MainVertex, tangent));
+
+	//Bitangent
+	//vertexDesc->addBinding(4, LV_VERTEX_FORMAT_RGB32_SFLOAT, offsetof(MainVertex, bitangent));
 
 	//Bitangent
 	/*

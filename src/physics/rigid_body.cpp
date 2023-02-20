@@ -1,12 +1,17 @@
 #include "lvutils/physics/rigid_body.hpp"
 
+#include <iostream>
+
 namespace lv {
 
 void RigidBodyComponent::init(ColliderComponent& collider, glm::vec3 position, glm::vec3 rotation) {
     btQuaternion quat;
     quat.setEulerZYX(glm::radians(rotation.z), glm::radians(rotation.y), glm::radians(rotation.x));
+    btQuaternion quat2;
+    quat2.setEulerZYX(0.0f, 0.0f, 0.0f);
 
-    motionState = new btDefaultMotionState(btTransform(quat, btVector3(position.x, position.y, position.z)));
+    //position += origin;
+    motionState = new btDefaultMotionState(btTransform(quat, btVector3(position.x, position.y, position.z))/*, btTransform(quat2, btVector3(-origin.x, -origin.y, -origin.z))*/);
     //btTransform transform;
     //motionState->getWorldTransform(transform);
     //transform->setFromOpenGLMatrix()

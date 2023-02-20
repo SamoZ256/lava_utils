@@ -4,9 +4,8 @@
 #include "../libraries/glm.hpp"
 
 #include "lvcore/core/uniform_buffer.hpp"
-#ifdef LV_BACKEND_VULKAN
 #include "lvcore/core/descriptor_set.hpp"
-#endif
+#include "lvcore/core/pipeline_layout.hpp"
 
 namespace lv {
 

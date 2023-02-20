@@ -42,13 +42,9 @@ public:
     ImageView prefilteredMapImageView;
     Sampler prefilteredMapSampler;
     
-    LvFormat format = LV_FORMAT_RGBA8_UNORM;
+    LvFormat format = LV_FORMAT_R8G8B8A8_UNORM;
 
     std::string filename;
-
-    GraphicsPipeline* equiToCubeGraphicsPipeline = nullptr;
-    GraphicsPipeline* irradianceGraphicsPipeline = nullptr;
-    GraphicsPipeline* prefilteredGraphicsPipeline = nullptr;
 
     Buffer* vertexBuffer = nullptr;
     Buffer* indexBuffer = nullptr;
@@ -109,13 +105,13 @@ public:
     //Right, left, top, bottom, front, back
     std::vector<glm::mat4> captureViews;
 
-    Skylight();
+    Skylight(uint8_t threadIndex);
 
-    void load(const char* aFilename, GraphicsPipelineCreateInfo& equiToCubeGraphicsPipelineCreateInfo);
+    void load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline& equiToCubeGraphicsPipeline);
 
-    void createIrradianceMap(GraphicsPipelineCreateInfo& irradianceGraphicsPipelineCreateInfo);
+    void createIrradianceMap(uint8_t threadIndex, GraphicsPipeline& irradianceGraphicsPipeline);
 
-    void createPrefilteredMap(GraphicsPipelineCreateInfo& prefilteredGraphicsPipelineCreateInfo);
+    void createPrefilteredMap(uint8_t threadIndex, GraphicsPipeline& prefilteredGraphicsPipeline);
 
     void destroy();
 

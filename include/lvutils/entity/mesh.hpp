@@ -8,14 +8,16 @@
 
 #include "../libraries/glm.hpp"
 
+#include "lvcore/core/enums.hpp"
+
 #include "lvcore/core/buffer.hpp"
 #include "lvcore/core/texture.hpp"
-#ifdef LV_BACKEND_VULKAN
 #include "lvcore/core/descriptor_set.hpp"
-#endif
+#include "lvcore/core/pipeline_layout.hpp"
+
 #include "vertex.hpp"
 
-#define LV_MESH_TEXTURE_COUNT 2
+#define LV_MESH_TEXTURE_COUNT 3
 
 namespace lv {
 
@@ -43,12 +45,13 @@ public:
     //UniformBuffer uniformBuffer = UniformBuffer(sizeof(UBOAvailableTextures));
     //UBOAvailableTextures uboAvailableTextures;
 
-    static Texture neautralTexture;
+    static Texture neutralTexture;
+    static Texture normalNeutralTexture;
 
     static std::vector<lv::Texture*> loadedTextures;
 
     std::array<Texture*, LV_MESH_TEXTURE_COUNT> textures = {
-        &neautralTexture, &neautralTexture
+        &neutralTexture, &neutralTexture, &normalNeutralTexture
     };
 
     //Dimensions
@@ -57,14 +60,14 @@ public:
     float radius;
 
 #ifdef LV_BACKEND_METAL
-		static uint16_t bindingIndices[2];
+		static uint16_t bindingIndices[LV_MESH_TEXTURE_COUNT];
 #endif
 
 #ifdef LV_BACKEND_VULKAN
     MeshComponent(PipelineLayout& pipelineLayout) { descriptorSet = new DescriptorSet(pipelineLayout, 2); }
 #endif
 
-    void init(std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices/*, std::vector<Texture*>& aTextures*/);
+    void init(uint8_t threadIndex, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices/*, std::vector<Texture*>& aTextures*/);
 
     void destroy();
 
@@ -86,12 +89,12 @@ public:
 #endif
     );
 
-	void createPlane();
+	void createPlane(uint8_t threadIndex);
 
-    void loadFromFile(const char* aVertDataFilename, const char* aIndDataFilename);
+    void loadFromFile(uint8_t threadIndex, const char* aVertDataFilename, const char* aIndDataFilename);
 
     //Static functions
-    static Texture* loadTextureFromFile(const char* filename);
+    static Texture* loadTextureFromFile(uint8_t threadIndex, const char* filename, LvFormat format = LV_FORMAT_R8G8B8A8_UNORM_SRGB);
 
 private:
 #ifdef LV_BACKEND_VULKAN

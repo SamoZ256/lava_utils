@@ -15,15 +15,13 @@ public:
     float restitution = 1.0f;
     float friction = 1.0f;
 
-    bool syncTransform = true;
-
     btVector3 intertia;
 
     btRigidBody* rigidBody = nullptr;
 
     btDefaultMotionState* motionState;
 
-    RigidBodyComponent(PhysicsWorld& aWorld) : world(&aWorld) { }
+    RigidBodyComponent(PhysicsWorld& aWorld) : world(&aWorld) {}
 
     void init(ColliderComponent& collider, glm::vec3 position, glm::vec3 rotation);
 
