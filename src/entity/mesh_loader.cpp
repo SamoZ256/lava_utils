@@ -153,20 +153,14 @@ void MeshLoader::processMesh(aiNode* node, aiMesh* mesh, const aiScene* scene) {
 		*/
 
 		//glm::vec3 center = glm::vec3((minX + maxX) / 2.0f, (minY + maxY) / 2.0f, (minZ + maxZ) / 2.0f);
-		MeshComponent& newMesh = meshes.emplace_back(
-#ifdef LV_BACKEND_VULKAN
-			*pipelineLayout
-#endif
-		);
+		MeshComponent& newMesh = meshes.emplace_back(*pipelineLayout);
 		newMesh.init(threadIndex, vertices, indices);
 		for (uint8_t i = 0; i < textures.size(); i++) {
 			//if (textures[i] != nullptr)
 			newMesh.setTexture(textures[i], i);
 		}
 
-#ifdef LV_BACKEND_VULKAN
 		newMesh.initDescriptorSet();
-#endif
 		/*
 		std::cout << "Init: " << aiTextureType_DIFFUSE << " : " << aiTextureType_SPECULAR << " : " << aiTextureType_HEIGHT << " : " << aiTextureType_SHININESS << " : " << aiTextureType_AMBIENT << std::endl;
 		for (int i = 0; i <= aiTextureType_UNKNOWN; i++) {

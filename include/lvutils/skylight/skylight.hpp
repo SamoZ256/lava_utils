@@ -29,14 +29,13 @@ struct UBOCubemapVP {
 
 class Skylight {
 public:
+    Sampler sampler;
+
     Image environmentMapImage;
     ImageView environmentMapImageView;
-    Sampler environmentMapSampler;
-    //VmaAllocation allocation;
 
     Image irradianceMapImage;
     ImageView irradianceMapImageView;
-    Sampler irradianceMapSampler;
 
     Image prefilteredMapImage;
     ImageView prefilteredMapImageView;
@@ -46,8 +45,8 @@ public:
 
     std::string filename;
 
-    Buffer* vertexBuffer = nullptr;
-    Buffer* indexBuffer = nullptr;
+    Buffer vertexBuffer;
+    Buffer indexBuffer;
 
     std::vector<Vertex3D> vertices = {
         {{-1.0f,  1.0f, -1.0f}},

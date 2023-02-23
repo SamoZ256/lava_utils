@@ -4,22 +4,21 @@
 
 namespace lv {
 
-#ifdef LV_BACKEND_VULKAN
 MaterialComponent::MaterialComponent(PipelineLayout& pipelineLayout) {
-    descriptorSet = new DescriptorSet(pipelineLayout, 1);
-    descriptorSet->addBinding(materialUniformBuffer.descriptorInfo(), 0);
-    descriptorSet->init();
+    materialUniformBuffer.usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+    materialUniformBuffer.memoryType = LV_MEMORY_TYPE_SHARED;
+    materialUniformBuffer.init(sizeof(UBOMaterial));
+
+    descriptorSet.pipelineLayout = &pipelineLayout;
+    descriptorSet.layoutIndex = 1;
+    descriptorSet.addBinding(materialUniformBuffer.descriptorInfo(), 0);
+    descriptorSet.init();
 }
-#endif
 
 void MaterialComponent::uploadUniforms() {
     //std::cout << "MATERIAL: " << (int)descriptorSet.shaderType << std::endl;
-    materialUniformBuffer.upload(&material);
-#ifdef LV_BACKEND_VULKAN
-    descriptorSet->bind();
-#elif defined LV_BACKEND_METAL
-    materialUniformBuffer.bindToFragmentShader(0);
-#endif
+    materialUniformBuffer.copyDataTo(0, &material);
+    descriptorSet.bind();
 }
 
 void MaterialComponent::destroy() {

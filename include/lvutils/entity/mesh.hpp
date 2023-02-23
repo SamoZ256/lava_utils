@@ -11,7 +11,9 @@
 #include "lvcore/core/enums.hpp"
 
 #include "lvcore/core/buffer.hpp"
-#include "lvcore/core/texture.hpp"
+#include "lvcore/core/image.hpp"
+#include "lvcore/core/image_view.hpp"
+#include "lvcore/core/sampler.hpp"
 #include "lvcore/core/descriptor_set.hpp"
 #include "lvcore/core/pipeline_layout.hpp"
 
@@ -21,18 +23,26 @@
 
 namespace lv {
 
-/*
-struct UBOAvailableTextures {
-  bool availableTextures[4] = {false};
+struct Texture {
+    std::string filename;
+    Image image;
+    ImageView imageView;
+
+    void init(const char* aFilename, LvFormat format = LV_FORMAT_R8G8B8A8_UNORM, bool generateMipmaps = false) {
+        filename = std::string(aFilename);
+        image.format = format;
+        image.usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT;
+        image.initFromFile(aFilename);
+        if (generateMipmaps)
+            image.generateMipmaps(0);
+        image.transitionLayout(0, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        imageView.init(&image);
+    }
 };
-*/
 
 //TODO: destroy textures once at mesh destroying
 class MeshComponent {
 public:
-    //std::vector<Texture*>& textures;
-    //std::map<std::string, bool> setTextures;
-
     std::vector<MainVertex> vertices;
     std::vector<uint32_t> indices;
 
@@ -42,13 +52,13 @@ public:
     //Rendering
     Buffer vertexBuffer;
     Buffer indexBuffer;
-    //UniformBuffer uniformBuffer = UniformBuffer(sizeof(UBOAvailableTextures));
-    //UBOAvailableTextures uboAvailableTextures;
+
+    static Sampler sampler;
 
     static Texture neutralTexture;
     static Texture normalNeutralTexture;
 
-    static std::vector<lv::Texture*> loadedTextures;
+    static std::vector<Texture*> loadedTextures;
 
     std::array<Texture*, LV_MESH_TEXTURE_COUNT> textures = {
         &neutralTexture, &neutralTexture, &normalNeutralTexture
@@ -59,23 +69,18 @@ public:
     float maxX, maxY, maxZ;
     float radius;
 
-#ifdef LV_BACKEND_METAL
-		static uint16_t bindingIndices[LV_MESH_TEXTURE_COUNT];
-#endif
-
-#ifdef LV_BACKEND_VULKAN
-    MeshComponent(PipelineLayout& pipelineLayout) { descriptorSet = new DescriptorSet(pipelineLayout, 2); }
-#endif
+    MeshComponent(PipelineLayout& pipelineLayout) {
+        descriptorSet.pipelineLayout = &pipelineLayout;
+        descriptorSet.layoutIndex = 2;
+    }
 
     void init(uint8_t threadIndex, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices/*, std::vector<Texture*>& aTextures*/);
 
     void destroy();
 
-#ifdef LV_BACKEND_VULKAN
     void initDescriptorSet();
 
     void destroyDescriptorSet();
-#endif
 
     void setTexture(lv::Texture* texture, uint8_t index);
 
@@ -83,11 +88,7 @@ public:
 
     void renderShadows();
 
-    void renderNoTextures(
-#ifdef LV_BACKEND_METAL
-        uint8_t bindingIndex
-#endif
-    );
+    void renderNoTextures();
 
 	void createPlane(uint8_t threadIndex);
 
@@ -97,9 +98,7 @@ public:
     static Texture* loadTextureFromFile(uint8_t threadIndex, const char* filename, LvFormat format = LV_FORMAT_R8G8B8A8_UNORM_SRGB);
 
 private:
-#ifdef LV_BACKEND_VULKAN
-    DescriptorSet* descriptorSet;
-#endif
+    DescriptorSet descriptorSet;
 };
 
 } //namespace lv

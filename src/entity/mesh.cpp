@@ -6,34 +6,24 @@
 
 namespace lv {
 
+Sampler MeshComponent::sampler = Sampler();
 Texture MeshComponent::neutralTexture = Texture();
 Texture MeshComponent::normalNeutralTexture = Texture();
 std::vector<Texture*> MeshComponent::loadedTextures = std::vector<Texture*>();
-
-#ifdef LV_BACKEND_METAL
-uint16_t MeshComponent::bindingIndices[LV_MESH_TEXTURE_COUNT] = {
-    2, 1, 0
-};
-#endif
 
 void MeshComponent::init(uint8_t threadIndex, std::vector<MainVertex>& aVertices, std::vector<uint32_t>& aIndices) {
     vertices = aVertices;
     indices = aIndices;
 
-    //std::cout << "MESH DESCRIPTOR_SET: " << (int)shaderType << std::endl;
-#ifdef LV_BACKEND_VULKAN
-    vertexBuffer.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-    indexBuffer.usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-#endif
-    vertexBuffer.init(threadIndex, vertices.data(), vertices.size() * sizeof(MainVertex));
-    indexBuffer.init(threadIndex, indices.data(), indices.size() * sizeof(uint32_t));
-    /*
-    for (uint8_t i = 0; i < textures.size(); i++) {
-        if (textures[i] != nullptr)
-        descriptorSet.addImageBinding(textures[i]->sampler.descriptorInfo(), i, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER);
-    }
-    */
-    //descriptorSet.addBufferBinding(uniformBuffer.descriptorInfo(), 0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER);
+    vertexBuffer.frameCount = 1;
+    vertexBuffer.usage = LV_BUFFER_USAGE_TRANSFER_DST_BIT | LV_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    vertexBuffer.init(vertices.size() * sizeof(MainVertex));
+    vertexBuffer.copyDataTo(threadIndex, vertices.data());
+
+    indexBuffer.frameCount = 1;
+    indexBuffer.usage = LV_BUFFER_USAGE_TRANSFER_DST_BIT | LV_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    indexBuffer.init(indices.size() * sizeof(uint32_t));
+    indexBuffer.copyDataTo(threadIndex, indices.data());
 
     //Get dimensions
     float radius2 = 0.0f;
@@ -54,25 +44,23 @@ void MeshComponent::init(uint8_t threadIndex, std::vector<MainVertex>& aVertices
 }
 
 void MeshComponent::destroy() {
-  vertexBuffer.destroy();
-  indexBuffer.destroy();
-  //descriptorSet.destroy();
-  //for (auto& tex : textures) tex.destroy();
+    vertexBuffer.destroy();
+    indexBuffer.destroy();
+    //descriptorSet.destroy();
+    //for (auto& tex : textures) tex.destroy();
 }
 
-#ifdef LV_BACKEND_VULKAN
 void MeshComponent::initDescriptorSet() {
     for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
-        descriptorSet->addBinding(textures[i]->sampler.descriptorInfo(textures[i]->imageView), i);
+        descriptorSet.addBinding(sampler.descriptorInfo(textures[i]->imageView), i);
     }
 
-    descriptorSet->init();
+    descriptorSet.init();
 }
 
 void MeshComponent::destroyDescriptorSet() {
-    descriptorSet->destroy();
+    descriptorSet.destroy();
 }
-#endif
 
 void MeshComponent::setTexture(Texture* texture, uint8_t index) {
     if (texture != nullptr)
@@ -80,39 +68,16 @@ void MeshComponent::setTexture(Texture* texture, uint8_t index) {
 }
 
 void MeshComponent::render() {
-#ifdef LV_BACKEND_VULKAN
-    descriptorSet->bind();
-#elif defined(LV_BACKEND_METAL)
-    for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
-        textures[i]->image.bind(bindingIndices[i]);
-        textures[i]->sampler.bind(bindingIndices[i]);
-    }
-#endif
-    renderNoTextures(
-#ifdef LV_BACKEND_METAL
-        MainVertex::BINDING_INDEX
-#endif
-    );
+    descriptorSet.bind();
+    renderNoTextures();
 }
 
 void MeshComponent::renderShadows() {
-    renderNoTextures(
-#ifdef LV_BACKEND_METAL
-        MainVertex::BINDING_INDEX_SHADOWS
-#endif
-    );
+    renderNoTextures();
 }
 
-void MeshComponent::renderNoTextures(
-#ifdef LV_BACKEND_METAL
-uint8_t bindingIndex
-#endif
-) {
-    vertexBuffer.bindVertexBuffer(
-#ifdef LV_BACKEND_METAL
-        bindingIndex
-#endif
-    );
+void MeshComponent::renderNoTextures() {
+    vertexBuffer.bindVertexBuffer();
     indexBuffer.bindIndexBuffer(LV_INDEX_TYPE_UINT32);
     indexBuffer.renderIndexed(sizeof(uint32_t));
 }
@@ -160,13 +125,11 @@ Texture* MeshComponent::loadTextureFromFile(uint8_t threadIndex, const char* fil
 			return loadedTextures[j];
 		}
 	}
-	//}
 
 	Texture* texture = new Texture;
-    texture->format = format;
-	texture->load(filename);
-    texture->generateMipmaps = true;
-	texture->init(threadIndex);
+    texture->filename = strFilename;
+    texture->init(filename, format, true);
+
 	loadedTextures.push_back(texture);
 
 	return texture;

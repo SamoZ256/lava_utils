@@ -16,18 +16,7 @@ void TransformComponent::calcModel(glm::mat4 parentModel) {
                   glm::toMat4(glm::quat(glm::radians(rotation))) *
                   glm::scale(glm::mat4(1.0f), scale);
 
-//#ifdef LV_BACKEND_VULKAN
     model.normalMatrix = glm::mat4(glm::transpose(glm::inverse(glm::mat3(model.model))));
-//#elif defined LV_BACKEND_METAL
-//    model.normalMatrix = glm::mat4(glm::transpose(glm::inverse(glm::mat3(glm::toMat4(glm::quat(glm::radians(rotation)))))));
-//#endif
 }
-
-/*
-void Transform::uploadModel(VkPipelineLayout& pipelineLayout) {
-  PushConstantM m{model, normalMatrix};
-  Rend::g_renderer.uploadPushConstant(pipelineLayout, &m);
-}
-*/
 
 } //namespace lv

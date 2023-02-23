@@ -17,11 +17,9 @@ public:
 
 	std::string directory;
 
-#ifdef LV_BACKEND_VULKAN
 	PipelineLayout* pipelineLayout;
 
 	MeshLoader(PipelineLayout& aPipelineLayout) : pipelineLayout(&aPipelineLayout) {}
-#endif
 
 	void loadFromFile(const char* filename);
 

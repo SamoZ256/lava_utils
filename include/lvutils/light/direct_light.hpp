@@ -3,7 +3,7 @@
 
 #include "../libraries/glm.hpp"
 
-#include "lvcore/core/uniform_buffer.hpp"
+#include "lvcore/core/buffer.hpp"
 
 namespace lv {
 
@@ -15,13 +15,17 @@ struct UniformDirectLight {
 class DirectLight {
 public:
     UniformDirectLight light;
-    UniformBuffer lightUniformBuffer = UniformBuffer(sizeof(UniformDirectLight));
+    Buffer lightUniformBuffer;
 
-    DirectLight() = default;
+    DirectLight() {
+        lightUniformBuffer.usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
+        lightUniformBuffer.memoryType = LV_MEMORY_TYPE_SHARED;
+        lightUniformBuffer.init(sizeof(UniformDirectLight));
+    }
 
     void destroy() { lightUniformBuffer.destroy(); }
 
-    void uploadUniforms() { lightUniformBuffer.upload(&light); }
+    void uploadUniforms() { lightUniformBuffer.copyDataTo(0, &light); }
 };
 
 } //namespace lv
