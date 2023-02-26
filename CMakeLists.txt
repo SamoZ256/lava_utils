@@ -16,6 +16,7 @@ add_compile_options(
 
 option(BACKEND_VULKAN "Build using vulkan backend" OFF)
 option(BACKEND_METAL "Build using metal backend" OFF)
+option(BACKEND_OPENGL "Build using opengl backend" OFF)
 
 set(BACKEND)
 
@@ -38,6 +39,16 @@ elseif (BACKEND_METAL)
 
     include_directories(
         "external/metal-cpp/include"
+    )
+elseif (BACKEND_OPENGL)
+    set(BACKEND opengl)
+
+    add_compile_definitions(
+        LV_BACKEND_OPENGL
+    )
+
+    include_directories(
+        "external/glad/include"
     )
 endif ()
 

@@ -1,5 +1,7 @@
 #define GLM_FORCE_RADIANS
+#ifndef LV_BACKEND_OPENGL
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#endif
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

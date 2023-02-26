@@ -105,13 +105,13 @@ void MeshComponent::loadFromFile(uint8_t threadIndex, const char* aVertDataFilen
     size_t vertSize;
     lv::loadRawBinary(aVertDataFilename, &vertData, &vertSize);
 
-    std::vector<lv::MainVertex> vertices((lv::MainVertex*)vertData, (lv::MainVertex*)vertData + vertSize / sizeof(lv::MainVertex));//((std::istreambuf_iterator<char>(vertFile)), std::istreambuf_iterator<char>());
+    std::vector<lv::MainVertex> vertices((lv::MainVertex*)vertData, (lv::MainVertex*)vertData + vertSize / sizeof(lv::MainVertex));
 
     void* indData;
     size_t indSize;
     lv::loadRawBinary(aIndDataFilename, &indData, &indSize);
 
-    std::vector<uint32_t> indices((uint32_t*)indData, (uint32_t*)indData + indSize / sizeof(uint32_t));//((unsigned int*)indChar, (unsigned int*)indChar + strlen(indChar) * sizeof(char));
+    std::vector<uint32_t> indices((uint32_t*)indData, (uint32_t*)indData + indSize / sizeof(uint32_t));
 
     init(threadIndex, vertices, indices);
 }
