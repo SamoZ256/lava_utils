@@ -27,16 +27,20 @@ struct Texture {
     std::string filename;
     Image image;
     ImageView imageView;
+    Sampler sampler;
 
     void init(const char* aFilename, LvFormat format = LV_FORMAT_R8G8B8A8_UNORM, bool generateMipmaps = false) {
         filename = std::string(aFilename);
+        image.frameCount = 1;
         image.format = format;
-        image.usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT;
-        image.initFromFile(aFilename);
-        if (generateMipmaps)
-            image.generateMipmaps(0);
+        image.usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT | LV_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        image.initFromFile(aFilename, generateMipmaps);
         image.transitionLayout(0, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         imageView.init(&image);
+        sampler.filter = LV_FILTER_LINEAR;
+        sampler.addressMode = LV_SAMPLER_ADDRESS_MODE_REPEAT;
+        sampler.maxLod = image.mipCount;
+        sampler.init();
     }
 };
 
@@ -52,8 +56,6 @@ public:
     //Rendering
     Buffer vertexBuffer;
     Buffer indexBuffer;
-
-    static Sampler sampler;
 
     static Texture neutralTexture;
     static Texture normalNeutralTexture;

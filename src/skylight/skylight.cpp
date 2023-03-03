@@ -73,13 +73,13 @@ void Skylight::load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline
         .index = 0
     });
 
-    framebuffer.init(equiToCubeGraphicsPipeline.createInfo.renderPass);
+    framebuffer.init(equiToCubeGraphicsPipeline.renderPass);
     
     Buffer uniformBuffers[6];
     
     DescriptorSet descriptorSets[6];
     for (uint8_t i = 0; i < 6; i++) {
-        descriptorSets[i].pipelineLayout = equiToCubeGraphicsPipeline.createInfo.pipelineLayout;
+        descriptorSets[i].pipelineLayout = equiToCubeGraphicsPipeline.pipelineLayout;
         descriptorSets[i].layoutIndex = 0;
 
         uniformBuffers[i].usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
@@ -153,13 +153,13 @@ void Skylight::createIrradianceMap(uint8_t threadIndex, GraphicsPipeline& irradi
         .index = 0
     });
 
-    framebuffer.init(irradianceGraphicsPipeline.createInfo.renderPass);
+    framebuffer.init(irradianceGraphicsPipeline.renderPass);
     
     Buffer uniformBuffers[6];
     
     DescriptorSet descriptorSets[6];
     for (uint8_t i = 0; i < 6; i++) {
-        descriptorSets[i].pipelineLayout = irradianceGraphicsPipeline.createInfo.pipelineLayout;
+        descriptorSets[i].pipelineLayout = irradianceGraphicsPipeline.pipelineLayout;
         descriptorSets[i].layoutIndex = 0;
 
         uniformBuffers[i].usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
@@ -246,14 +246,14 @@ void Skylight::createPrefilteredMap(uint8_t threadIndex, GraphicsPipeline& prefi
         });
     }
     for (uint8_t i = 0; i < MAX_CUBEMAP_MIP_LEVELS; i++) {
-        framebuffers[i].init(prefilteredGraphicsPipeline.createInfo.renderPass);
+        framebuffers[i].init(prefilteredGraphicsPipeline.renderPass);
     }
     
     Buffer uniformBuffers[6];
     
     DescriptorSet descriptorSets[6];
     for (uint8_t i = 0; i < 6; i++) {
-        descriptorSets[i].pipelineLayout = prefilteredGraphicsPipeline.createInfo.pipelineLayout;
+        descriptorSets[i].pipelineLayout = prefilteredGraphicsPipeline.pipelineLayout;
         descriptorSets[i].layoutIndex = 0;
 
         uniformBuffers[i].usage = LV_BUFFER_USAGE_UNIFORM_BUFFER_BIT;

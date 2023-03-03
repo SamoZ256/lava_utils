@@ -6,7 +6,6 @@
 
 namespace lv {
 
-Sampler MeshComponent::sampler = Sampler();
 Texture MeshComponent::neutralTexture = Texture();
 Texture MeshComponent::normalNeutralTexture = Texture();
 std::vector<Texture*> MeshComponent::loadedTextures = std::vector<Texture*>();
@@ -52,7 +51,7 @@ void MeshComponent::destroy() {
 
 void MeshComponent::initDescriptorSet() {
     for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
-        descriptorSet.addBinding(sampler.descriptorInfo(textures[i]->imageView), i);
+        descriptorSet.addBinding(textures[i]->sampler.descriptorInfo(textures[i]->imageView), i);
     }
 
     descriptorSet.init();
@@ -127,7 +126,6 @@ Texture* MeshComponent::loadTextureFromFile(uint8_t threadIndex, const char* fil
 	}
 
 	Texture* texture = new Texture;
-    texture->filename = strFilename;
     texture->init(filename, format, true);
 
 	loadedTextures.push_back(texture);
