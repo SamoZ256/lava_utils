@@ -14,7 +14,7 @@ class ScriptComponent;
 
 class Script {
 public:
-    void* handle;
+    void* handle = nullptr;
     newEntityFun entityConstructor;
 
     std::string filename;
@@ -27,7 +27,7 @@ public:
 
     void init(const char* aFilename);
 
-    void destroy() { dlclose(handle); }
+    void destroy();
 
     void loadFromFile();
 

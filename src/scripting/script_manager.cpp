@@ -12,6 +12,8 @@ Script* ScriptManager::loadScript(const char* filename) {
     std::string strFilename(filename);
     for (auto& script : scripts) {
         if (script->filename == strFilename) {
+            if (script->handle == nullptr)
+                script->loadFromFile();
             return script;
         }
     }

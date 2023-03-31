@@ -18,6 +18,11 @@ void Script::init(const char* aFilename) {
     loadFromFile();
 }
 
+void Script::destroy() {
+    dlclose(handle);
+    handle = nullptr;
+}
+
 void Script::loadFromFile() {
     system(cmd.c_str());
 
