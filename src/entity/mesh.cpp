@@ -51,7 +51,7 @@ void MeshComponent::destroy() {
 
 void MeshComponent::initDescriptorSet() {
     for (uint8_t i = 0; i < LV_MESH_TEXTURE_COUNT; i++) {
-        descriptorSet.addBinding(textures[i]->sampler.descriptorInfo(textures[i]->imageView), i);
+        descriptorSet.addBinding(textures[i]->sampler.descriptorInfo(textures[i]->image), i);
     }
 
     descriptorSet.init();

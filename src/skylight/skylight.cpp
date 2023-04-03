@@ -55,9 +55,6 @@ void Skylight::load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline
     environmentMapImage.viewType = LV_IMAGE_VIEW_TYPE_CUBE;
     environmentMapImage.layerCount = 6;
     environmentMapImage.init(SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
-
-    //Image view
-    environmentMapImageView.init(&environmentMapImage);
     
     Framebuffer framebuffer;
     framebuffer.frameCount = 1;
@@ -69,7 +66,7 @@ void Skylight::load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline
     Viewport viewport(0, 0, SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
 
     framebuffer.addColorAttachment({
-        .imageView = &environmentMapImageView,
+        .image = &environmentMapImage,
         .index = 0
     });
 
@@ -88,7 +85,7 @@ void Skylight::load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline
 
         descriptorSets[i].frameCount = 1;
         descriptorSets[i].addBinding(uniformBuffers[i].descriptorInfo(), 0);
-        descriptorSets[i].addBinding(sampler.descriptorInfo(loadedTexture.imageView), 1);
+        descriptorSets[i].addBinding(sampler.descriptorInfo(loadedTexture.image), 1);
         descriptorSets[i].init();
     }
 
@@ -120,7 +117,6 @@ void Skylight::load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline
     //Clean up
     g_device->waitIdle();
 
-    loadedTexture.imageView.destroy();
     loadedTexture.image.destroy();
 
     framebuffer.destroy();
@@ -138,9 +134,6 @@ void Skylight::createIrradianceMap(uint8_t threadIndex, GraphicsPipeline& irradi
     irradianceMapImage.layerCount = 6;
     irradianceMapImage.init(SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
 
-    //Image view
-    irradianceMapImageView.init(&irradianceMapImage);
-
     Framebuffer framebuffer;
     framebuffer.frameCount = 1;
     
@@ -149,7 +142,7 @@ void Skylight::createIrradianceMap(uint8_t threadIndex, GraphicsPipeline& irradi
     commandBuffer.init();
 
     framebuffer.addColorAttachment({
-        .imageView = &irradianceMapImageView,
+        .image = &irradianceMapImage,
         .index = 0
     });
 
@@ -168,7 +161,7 @@ void Skylight::createIrradianceMap(uint8_t threadIndex, GraphicsPipeline& irradi
 
         descriptorSets[i].frameCount = 1;
         descriptorSets[i].addBinding(uniformBuffers[i].descriptorInfo(), 0);
-        descriptorSets[i].addBinding(sampler.descriptorInfo(environmentMapImageView), 1);
+        descriptorSets[i].addBinding(sampler.descriptorInfo(environmentMapImage), 1);
         descriptorSets[i].init();
     }
 
@@ -216,16 +209,9 @@ void Skylight::createPrefilteredMap(uint8_t threadIndex, GraphicsPipeline& prefi
     prefilteredMapImage.mipCount = MAX_CUBEMAP_MIP_LEVELS;
     prefilteredMapImage.init(SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
 
-    //Image view
-    prefilteredMapImageView.init(&prefilteredMapImage);
-
-    ImageView prefilteredMapImageViewsForWriting[MAX_CUBEMAP_MIP_LEVELS];
-    for (uint8_t i = 0; i < MAX_CUBEMAP_MIP_LEVELS; i++) {
-        prefilteredMapImageViewsForWriting[i].viewType = LV_IMAGE_VIEW_TYPE_CUBE;
-        prefilteredMapImageViewsForWriting[i].baseMip = i;
-        prefilteredMapImageViewsForWriting[i].mipCount = 1;
-        prefilteredMapImageViewsForWriting[i].init(&prefilteredMapImage);
-    }
+    Image prefilteredMapImageViewsForWriting[MAX_CUBEMAP_MIP_LEVELS];
+    for (uint8_t i = 0; i < MAX_CUBEMAP_MIP_LEVELS; i++)
+        prefilteredMapImage.newImageView(prefilteredMapImageViewsForWriting[i], LV_IMAGE_VIEW_TYPE_CUBE, 0, 6, i, 1);
 
     //Sampler
     prefilteredMapSampler.filter = LV_FILTER_LINEAR;
@@ -241,7 +227,7 @@ void Skylight::createPrefilteredMap(uint8_t threadIndex, GraphicsPipeline& prefi
     for (uint8_t i = 0; i < MAX_CUBEMAP_MIP_LEVELS; i++) {
         framebuffers[i].frameCount = 1;
         framebuffers[i].addColorAttachment({
-            .imageView = &prefilteredMapImageViewsForWriting[i],
+            .image = &prefilteredMapImageViewsForWriting[i],
             .index = 0
         });
     }
@@ -262,7 +248,7 @@ void Skylight::createPrefilteredMap(uint8_t threadIndex, GraphicsPipeline& prefi
 
         descriptorSets[i].frameCount = 1;
         descriptorSets[i].addBinding(uniformBuffers[i].descriptorInfo(), 0);
-        descriptorSets[i].addBinding(sampler.descriptorInfo(environmentMapImageView), 1);
+        descriptorSets[i].addBinding(sampler.descriptorInfo(environmentMapImage), 1);
         descriptorSets[i].init();
     }
 
@@ -309,13 +295,10 @@ void Skylight::destroy() {
     sampler.destroy();
 
     environmentMapImage.destroy();
-    environmentMapImageView.destroy();
 
     irradianceMapImage.destroy();
-    irradianceMapImageView.destroy();
 
     prefilteredMapImage.destroy();
-    prefilteredMapImageView.destroy();
     prefilteredMapSampler.destroy();
 }
 

@@ -9,7 +9,6 @@
 #include "lvcore/core/enums.hpp"
 
 #include "lvcore/core/image.hpp"
-#include "lvcore/core/image_view.hpp"
 #include "lvcore/core/buffer.hpp"
 #include "lvcore/core/graphics_pipeline.hpp"
 #include "lvcore/core/sampler.hpp"
@@ -32,13 +31,10 @@ public:
     Sampler sampler;
 
     Image environmentMapImage;
-    ImageView environmentMapImageView;
 
     Image irradianceMapImage;
-    ImageView irradianceMapImageView;
 
     Image prefilteredMapImage;
-    ImageView prefilteredMapImageView;
     Sampler prefilteredMapSampler;
     
     LvFormat format = LV_FORMAT_R8G8B8A8_UNORM;

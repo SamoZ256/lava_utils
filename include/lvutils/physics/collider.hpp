@@ -3,8 +3,6 @@
 
 #include <stdexcept>
 
-#include "lvcore/common.hpp"
-
 #include "lvutils/libraries/glm.hpp"
 
 #include "physics_world.hpp"
@@ -15,7 +13,7 @@ class ColliderComponent {
 public:
     btCollisionShape* shape;
 
-    virtual void init() { LV_ERROR("Cannot call the 'init' method of base class 'Collider'"); }
+    virtual void init() { throw std::runtime_error("Cannot call the 'init' method of base class 'Collider'"); }
 
     virtual void destroy() { delete shape; }
 };

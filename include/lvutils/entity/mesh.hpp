@@ -12,7 +12,6 @@
 
 #include "lvcore/core/buffer.hpp"
 #include "lvcore/core/image.hpp"
-#include "lvcore/core/image_view.hpp"
 #include "lvcore/core/sampler.hpp"
 #include "lvcore/core/descriptor_set.hpp"
 #include "lvcore/core/pipeline_layout.hpp"
@@ -26,7 +25,6 @@ namespace lv {
 struct Texture {
     std::string filename;
     Image image;
-    ImageView imageView;
     Sampler sampler;
 
     void init(const char* aFilename, LvFormat format = LV_FORMAT_R8G8B8A8_UNORM, bool generateMipmaps = false) {
@@ -36,7 +34,6 @@ struct Texture {
         image.usage = LV_IMAGE_USAGE_SAMPLED_BIT | LV_IMAGE_USAGE_TRANSFER_DST_BIT | LV_IMAGE_USAGE_TRANSFER_SRC_BIT;
         image.initFromFile(aFilename, generateMipmaps);
         image.transitionLayout(0, 0, LV_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, LV_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        imageView.init(&image);
         sampler.filter = LV_FILTER_LINEAR;
         sampler.addressMode = LV_SAMPLER_ADDRESS_MODE_REPEAT;
         sampler.maxLod = image.mipCount;
