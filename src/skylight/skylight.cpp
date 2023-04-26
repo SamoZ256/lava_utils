@@ -53,7 +53,6 @@ void Skylight::load(uint8_t threadIndex, const char* aFilename, GraphicsPipeline
     environmentMapImage.usage |= LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_SAMPLED_BIT;
     environmentMapImage.aspectMask = LV_IMAGE_ASPECT_COLOR_BIT;
     environmentMapImage.viewType = LV_IMAGE_VIEW_TYPE_CUBE;
-    environmentMapImage.layerCount = 6;
     environmentMapImage.init(SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
     
     Framebuffer framebuffer;
@@ -131,7 +130,6 @@ void Skylight::createIrradianceMap(uint8_t threadIndex, GraphicsPipeline& irradi
     irradianceMapImage.usage |= LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_SAMPLED_BIT;
     irradianceMapImage.aspectMask = LV_IMAGE_ASPECT_COLOR_BIT;
     irradianceMapImage.viewType = LV_IMAGE_VIEW_TYPE_CUBE;
-    irradianceMapImage.layerCount = 6;
     irradianceMapImage.init(SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
 
     Framebuffer framebuffer;
@@ -205,7 +203,6 @@ void Skylight::createPrefilteredMap(uint8_t threadIndex, GraphicsPipeline& prefi
     prefilteredMapImage.usage |= LV_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | LV_IMAGE_USAGE_SAMPLED_BIT;
     prefilteredMapImage.aspectMask = LV_IMAGE_ASPECT_COLOR_BIT;
     prefilteredMapImage.viewType = LV_IMAGE_VIEW_TYPE_CUBE;
-    prefilteredMapImage.layerCount = 6;
     prefilteredMapImage.mipCount = MAX_CUBEMAP_MIP_LEVELS;
     prefilteredMapImage.init(SKYLIGHT_IMAGE_SIZE, SKYLIGHT_IMAGE_SIZE);
 

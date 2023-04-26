@@ -78,7 +78,7 @@ void MeshComponent::renderShadows() {
 void MeshComponent::renderNoTextures() {
     vertexBuffer.bindVertexBuffer();
     indexBuffer.bindIndexBuffer(LV_INDEX_TYPE_UINT32);
-    indexBuffer.renderIndexed(sizeof(uint32_t));
+    indexBuffer.drawIndexed(sizeof(uint32_t));
 }
 
 void MeshComponent::createPlane(uint8_t threadIndex) {
